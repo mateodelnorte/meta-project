@@ -32,6 +32,9 @@
     "chalk": "^1.1.3",
     "commander": "^2.9.0",
     "debug": "^2.3.3",
-    "loop-things": "0.0.21"
+    "find-file-recursively-up": "0.0.0",
+    "loop-things": "0.0.21",
+    "meta-exec": "0.0.0",
+    "mkdirp": "^0.5.1"
   }
 }
