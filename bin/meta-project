@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+
+let loaded = false;
+
+if (loaded) return process.kill();
+
+const program = require('commander');
+const debug = require('debug')('meta-project');
+
+program
+  .command('add', 'add child repository')
+  .parse(process.argv);
+
+loaded = true;

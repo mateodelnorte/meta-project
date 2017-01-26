@@ -1,0 +1,87 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const program = require('commander');
+const debug = require('debug')('meta-project-add');
+const path = require('path');
+const util = require('util');
+
+if ( ! process.argv[2] || process.argv[2] === '--help')
+  return console.log(`\n  usage:\n\n    meta project add <destFolder> <childRepoUrl>\n`);
+
+const destFolder = process.argv[2] === 'blank' ?
+                      process.argv[3] :
+                      process.argv[2];
+
+const dirname = path.basename(repoUrl).replace('.git', '')
+
+console.log(`meta project adding  into \'${repoUrl}\' at ${dirname}`);
+
+// meta project add <folder> <repo>
+
+// create folder
+
+// git init
+
+// if childRepoUrl git remote add origin 
+
+// update .meta
+
+// add to .gitignore
+
+// clone(repoUrl, dirname, (err, result) => {
+//   if (err) throw err;
+
+//   // read .meta file
+//   var meta = null; 
+//   var buffer = null;
+
+//   const metaLocation = path.join(process.cwd(), dirname, '.meta');
+
+//   try {
+//     buffer = fs.readFileSync(metaLocation);
+//     debug(`.meta file found at ${metaLocation}`);
+//   } catch (e) {
+//     debug(`no .meta file found at ${metaLocation}: ${e}`);
+//   }
+
+//   if (buffer) {
+//     try {
+//       meta = JSON.parse(buffer.toString());
+//       debug(`.meta file contents parsed: ${util.inspect(meta, null, Infinity)}`);
+//     } catch (e) {
+//       debug(`error parsing .meta JSON: ${e}`);
+//     }
+//   }
+
+//   const newDir = path.resolve(dirname);
+
+//   debug(`chdir to ${newDir}`);
+//   process.chdir(newDir);
+
+//   const projects = meta.projects;
+//   const folders = Object.keys(projects);
+
+//   var folder = null;
+
+//   function child (err) {
+//     if (err) throw err;
+    
+//     if ( ! folders.length) return console.log(`finished`);
+
+//     folder = folders.pop()
+
+//     const gitUrl = projects[folder];
+
+//     clone(gitUrl, folder, (err) => {
+//       if (err) throw err;
+
+//       child();
+
+//     });
+
+//   }
+
+//   child();
+
+// });
