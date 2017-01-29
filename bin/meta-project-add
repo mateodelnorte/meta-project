@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+
+const addToGitIgnore = require('../lib/addToGitIgnore');
+const addToMetaFile = require('../lib/addToMetaFile');
 const find = require('find-file-recursively-up');
 const fs = require('fs');
 const program = require('commander');
@@ -53,7 +56,9 @@ mkdirp(destFolder, (err) => {
       find('.meta', (err, metafilePath) => {
         if (err) throw err;
 
-        
+        addToMetaFile(metafilePath, destFolder, repoUrl)
+
+        addToGitIgnore(metafilePath.replace('.meta', '.gitignore'), destFolder);
 
       });
 
@@ -62,11 +67,3 @@ mkdirp(destFolder, (err) => {
   });
 
 });
-
-// git init
-
-// if childRepoUrl git remote add origin 
-
-// update .meta
-
-// add to .gitignore
