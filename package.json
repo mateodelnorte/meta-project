@@ -1,6 +1,6 @@
 {
   "name": "meta-project",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "project plugin for meta",
   "main": "index.js",
   "bin": {
@@ -33,7 +33,7 @@
     "commander": "^2.9.0",
     "debug": "^2.3.3",
     "find-file-recursively-up": "0.0.0",
-    "loop-things": "0.0.21",
+    "loop-things": "0.0.22",
     "meta-exec": "0.0.0",
     "mkdirp": "^0.5.1"
   }

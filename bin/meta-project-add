@@ -11,8 +11,10 @@ const mkdirp = require('mkdirp');
 const path = require('path');
 const util = require('util');
 
+const usage = `\n  usage:\n\n    meta project add <destFolder> <childRepoUrl>\n`;
+
 if ( ! process.argv[2] || process.argv[2] === '--help')
-  return console.log(`\n  usage:\n\n    meta project add <destFolder> <childRepoUrl>\n`);
+  return console.log(usage);
 
 const destFolder = process.argv[2] === 'blank' ?
                       process.argv[3] :
@@ -21,6 +23,8 @@ const destFolder = process.argv[2] === 'blank' ?
 const repoUrl = process.argv[3] === 'blank' ?
                       process.argv[4] :
                       process.argv[3];
+
+if ( ! destFolder || ! repoUrl) return console.log(usage);
 
 const dirname = path.basename(repoUrl).replace('.git', '')
 
