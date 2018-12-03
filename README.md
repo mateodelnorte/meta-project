@@ -1,4 +1,7 @@
 # meta-project
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/mateodelnorte/meta-project.svg)](https://greenkeeper.io/)
+
 project plugin for [meta](https://github.com/mateodelnorte/meta)
 
 
