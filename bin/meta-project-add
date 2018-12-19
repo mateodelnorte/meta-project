@@ -62,7 +62,7 @@ mkdirp(destFolder, (err) => {
 
         addToMetaFile(metafilePath, destFolder, repoUrl)
 
-        addToGitIgnore(metafilePath.replace('.meta', '.gitignore'), destFolder);
+        addToGitIgnore(metafilePath.replace(/.meta$/, '.gitignore'), destFolder);
 
       });
 
