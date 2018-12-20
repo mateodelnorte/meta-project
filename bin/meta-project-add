@@ -1,58 +1,109 @@
 #!/usr/bin/env node
 
-const find = require('find-file-recursively-up');
-const exec = require('meta-exec');
-const mkdirp = require('mkdirp');
-
-const addToGitIgnore = require('../lib/addToGitIgnore');
-const addToMetaFile = require('../lib/addToMetaFile');
+const usage = () => {
+  console.log('Usage: meta-project-add <destFolder> <childRepoUrl>');
+  process.exit(1);
+};
 
 const { argv } = process;
+/^(-h||--help)$/.test(argv[2]) && usage();
 
-const usage = `\n  usage:\n\n    meta project add <destFolder> <childRepoUrl>\n`;
-if (!argv[2] || argv[2] === '--help') return console.log(usage);
-
-const destFolder = argv[2] === 'blank' ? argv[3] : argv[2];
+const destArg = argv[2] === 'blank' ? argv[3] : argv[2];
 const repoUrl = argv[3] === 'blank' ? argv[4] : argv[3];
+(destArg && repoUrl) || usage();
 
-if (!destFolder || !repoUrl) return console.log(usage);
+const path = require('path');
+const { green, gray, cyan, inverse } = require('chalk');
 
-console.log(`meta project adding \'${repoUrl}\' at ${destFolder}`);
+// Load the ".meta" module.
+const meta = require('get-meta-file')();
+if (!meta) process.exit(1);
 
-mkdirp.sync(destFolder);
-process.chdir(destFolder);
-console.log(`created ${process.cwd()}`);
+const metaPath = require('get-meta-file').getFileLocation();
+const dest = path.relative(path.dirname(metaPath), path.resolve(destArg));
+if (dest[0] === '.') {
+  console.error(`💥 Projects cannot be outside the meta repo: ${cyan(dest)}`); // prettier-ignore
+  process.exit(1);
+}
 
-// meta project add <folder> <repo>
-exec(
-  {
-    command: 'git init',
-    suppressLogging: true,
-  },
-  err => {
-    if (err) throw err;
+const exec = require('meta-exec');
+const fs = require('fs');
+const mkdirp = require('mkdirp');
+const tildify = require('tildify');
 
-    exec(
-      {
-        command: `git remote add origin ${repoUrl}`,
-        suppressLogging: true,
-      },
-      err => {
-        if (err) throw err;
+const destExists = fs.existsSync(dest);
+if (!destExists) {
+  mkdirp.sync(dest);
+} else if (!fs.statSync(dest).isDirectory()) {
+  console.log(`💥 '${dest}' is not a directory`);
+  process.exit(1);
+}
 
-        console.log(`set remote origin to ${repoUrl}`);
+const gitExists = destExists && fs.existsSync(path.join(dest, '.git'));
+if (meta.projects[dest] === repoUrl && gitExists) {
+  console.log(`${green('✓')} No changes required.`);
+  process.exit(0);
+}
 
-        find('.meta', (err, metafilePath) => {
-          if (err) throw err;
+process.chdir(dest);
+gitInit(err => {
+  if (err) throw err;
 
-          addToMetaFile(metafilePath, destFolder, repoUrl);
-
-          addToGitIgnore(
-            metafilePath.replace(/.meta$/, '.gitignore'),
-            destFolder
-          );
-        });
-      }
-    );
+  if (!(dest in meta.projects)) {
+    const gitIgnorePath = metaPath.replace(/.meta$/, '.gitignore');
+    console.log(`Appending to ${cyan(tildify(gitIgnorePath))}`);
+    fs.appendFileSync(gitIgnorePath, dest + '\n');
   }
-);
+
+  console.log(`Updating "projects" in ${cyan(tildify(metaPath))}`); // prettier-ignore
+  if (!meta.projects) meta.projects = {};
+  meta.projects[dest] = repoUrl;
+  fs.writeFileSync(metaPath, JSON.stringify(meta, null, '  '));
+
+  console.log(`\n${green('✓')} Project ${destExists ? 'updated' : 'added'}: ${green(dest)}`); // prettier-ignore
+});
+
+// Create a ".git" directory if none exists.
+function gitInit(cb) {
+  if (gitExists) {
+    console.log(`Found pre-existing git repository`); // prettier-ignore
+    return gitSetup(cb);
+  }
+  exec(
+    {
+      command: 'git init',
+      suppressLogging: true,
+    },
+    err => {
+      if (err) cb(err);
+      else gitSetup(cb);
+    }
+  );
+}
+
+function gitSetup(cb) {
+  console.log(`Updating origin to ${cyan(repoUrl)}`);
+  exec(
+    {
+      command: `git remote remove origin; git remote add origin ${repoUrl}`,
+      suppressLogging: true,
+      stdio: 'ignore',
+    },
+    err => {
+      if (err) return cb(err);
+      if (destExists) {
+        console.log(gray(`Skipping automatic "git pull" to be safe.`));
+        return cb();
+      }
+      console.log(`Pulling from origin...`);
+      exec(
+        {
+          command: `git pull origin master`,
+          suppressLogging: true,
+          stdio: 'ignore',
+        },
+        cb
+      );
+    }
+  );
+}
