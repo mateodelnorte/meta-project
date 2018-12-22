@@ -1,73 +1,58 @@
 #!/usr/bin/env node
 
-const addToGitIgnore = require('../lib/addToGitIgnore');
-const addToMetaFile = require('../lib/addToMetaFile');
 const find = require('find-file-recursively-up');
-const fs = require('fs');
-const program = require('commander');
-const debug = require('debug')('meta-project-add');
 const exec = require('meta-exec');
 const mkdirp = require('mkdirp');
-const path = require('path');
-const util = require('util');
+
+const addToGitIgnore = require('../lib/addToGitIgnore');
+const addToMetaFile = require('../lib/addToMetaFile');
+
+const { argv } = process;
 
 const usage = `\n  usage:\n\n    meta project add <destFolder> <childRepoUrl>\n`;
+if (!argv[2] || argv[2] === '--help') return console.log(usage);
 
-if ( ! process.argv[2] || process.argv[2] === '--help')
-  return console.log(usage);
+const destFolder = argv[2] === 'blank' ? argv[3] : argv[2];
+const repoUrl = argv[3] === 'blank' ? argv[4] : argv[3];
 
-const destFolder = process.argv[2] === 'blank' ?
-                      process.argv[3] :
-                      process.argv[2];
-
-const repoUrl = process.argv[3] === 'blank' ?
-                      process.argv[4] :
-                      process.argv[3];
-
-if ( ! destFolder || ! repoUrl) return console.log(usage);
-
-const dirname = path.basename(repoUrl).replace('.git', '')
+if (!destFolder || !repoUrl) return console.log(usage);
 
 console.log(`meta project adding \'${repoUrl}\' at ${destFolder}`);
 
+mkdirp.sync(destFolder);
+process.chdir(destFolder);
+console.log(`created ${process.cwd()}`);
+
 // meta project add <folder> <repo>
-
-mkdirp(destFolder, (err) => {
-  if (err) throw err;
-
-  const dir = path.join(process.cwd(), destFolder);
-
-  console.log(`created ${dir}`);
-
-  process.chdir(dir);
-
-  exec({
+exec(
+  {
     command: 'git init',
-    dir: dir,
     suppressLogging: true,
-  }, (err) => {
+  },
+  err => {
     if (err) throw err;
 
-    exec({
-      command: `git remote add origin ${repoUrl}`,
-      dir: dir,
-      suppressLogging: true,
-    }, (err) => {
-      if (err) throw err;
-
-      console.log(`set remote origin to ${repoUrl}`);
-
-      find('.meta', (err, metafilePath) => {
+    exec(
+      {
+        command: `git remote add origin ${repoUrl}`,
+        suppressLogging: true,
+      },
+      err => {
         if (err) throw err;
 
-        addToMetaFile(metafilePath, destFolder, repoUrl)
+        console.log(`set remote origin to ${repoUrl}`);
 
-        addToGitIgnore(metafilePath.replace(/.meta$/, '.gitignore'), destFolder);
+        find('.meta', (err, metafilePath) => {
+          if (err) throw err;
 
-      });
+          addToMetaFile(metafilePath, destFolder, repoUrl);
 
-    });
-
-  });
-
-});
+          addToGitIgnore(
+            metafilePath.replace(/.meta$/, '.gitignore'),
+            destFolder
+          );
+        });
+      }
+    );
+  }
+);
