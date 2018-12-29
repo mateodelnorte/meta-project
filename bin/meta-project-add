@@ -52,7 +52,7 @@ gitInit(err => {
   if (!(dest in meta.projects)) {
     const gitIgnorePath = metaPath.replace(/.meta$/, '.gitignore');
     console.log(`Appending to ${cyan(tildify(gitIgnorePath))}`);
-    fs.appendFileSync(gitIgnorePath, dest + '\n');
+    fs.appendFileSync(gitIgnorePath, `/${dest}/\n`);
   }
 
   console.log(`Updating "projects" in ${cyan(tildify(metaPath))}`); // prettier-ignore
