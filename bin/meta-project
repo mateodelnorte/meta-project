@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
 let loaded = false;
-if (loaded) return process.kill();
-
-const program = require('commander');
-program.command('add', 'add child repository').parse(process.argv);
-
-loaded = true;
+if (!loaded) {
+  const program = require('commander');
+  program.command('add', 'add child repository').parse(process.argv);
+  loaded = true;
+}

@@ -31,8 +31,7 @@
   "dependencies": {
     "chalk": "^2.4.1",
     "commander": "^2.9.0",
-    "debug": "^4.1.0",
-    "find-file-recursively-up": "1.0.2",
+    "get-meta-file": "^1.0.0",
     "loop": "^3.0.6",
     "meta-exec": "^1.0.0",
     "mkdirp": "^0.5.1"
