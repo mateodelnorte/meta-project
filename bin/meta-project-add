@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const usage = () => {
-  console.log('Usage: meta-project-add <destFolder> <childRepoUrl> [childRepoBranch]');
+  console.log('Usage: meta-project-add <destFolder> <childRepoUrl> [defaultBranch]');
   process.exit(1);
 };
 
@@ -10,7 +10,7 @@ const { argv } = process;
 
 const destArg = argv[2] === 'blank' ? argv[3] : argv[2];
 const repoUrl = argv[3] === 'blank' ? argv[4] : argv[3];
-const repoBranch = argv[4] === 'blank' ? (argv[5] === 'blank' ? 'master' : argv[5]) : argv[4];
+const defaultBranch = argv[4] === 'blank' ? (argv[5] === 'blank' ? 'master' : argv[5]) : argv[4];
 
 (destArg && repoUrl) || usage();
 
@@ -42,7 +42,7 @@ if (!destExists) {
 }
 
 const gitExists = destExists && fs.existsSync(path.join(dest, '.git'));
-if (meta.projects[dest] === repoUrl && meta.branches[dest] === repoBranch && gitExists) {
+if (meta.projects[dest] === repoUrl && meta.branches[dest] === defaultBranch && gitExists) {
   console.log(`${green('✓')} No changes required.`);
   process.exit(0);
 }
@@ -65,7 +65,7 @@ gitInit(err => {
      meta.branches = {};
   }
   meta.projects[dest] = repoUrl;
-  meta.branches[dest] = repoBranch;
+  meta.branches[dest] = defaultBranch;
   fs.writeFileSync(metaPath, JSON.stringify(meta, null, '  '));
 
   console.log(`\n${green('✓')} Project ${destExists ? 'updated' : 'added'}: ${green(dest)}`); // prettier-ignore
@@ -103,10 +103,10 @@ function gitSetup(cb) {
         console.log(gray(`Skipping automatic "git pull" to be safe.`));
         return cb();
       }
-      console.log(`Pulling from origin/${repoBranch}...`);
+      console.log(`Pulling from origin/${defaultBranch}...`);
       exec(
         {
-          command: `git checkout -b ${repoBranch}; git pull origin ${repoBranch}`,
+          command: `git checkout -b ${defaultBranch}; git pull origin ${defaultBranch}`,
           suppressLogging: true,
           stdio: 'ignore',
         },
