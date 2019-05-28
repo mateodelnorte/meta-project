@@ -14,12 +14,13 @@ const repoUrl = argv[3] === 'blank' ? argv[4] : argv[3];
 
 const path = require('path');
 const { green, gray, cyan, inverse } = require('chalk');
+const getMetaFile = require('get-meta-file');
 
 // Load the ".meta" module.
-const meta = require('get-meta-file')();
+const meta = getMetaFile();
 if (!meta) process.exit(1);
 
-const metaPath = require('get-meta-file').getFileLocation();
+const metaPath = getMetaFile.getFileLocation();
 const dest = path.relative(path.dirname(metaPath), path.resolve(destArg));
 if (dest[0] === '.') {
   console.error(`💥 Projects cannot be outside the meta repo: ${cyan(dest)}`); // prettier-ignore
@@ -58,7 +59,7 @@ gitInit(err => {
   console.log(`Updating "projects" in ${cyan(tildify(metaPath))}`); // prettier-ignore
   if (!meta.projects) meta.projects = {};
   meta.projects[dest] = repoUrl;
-  fs.writeFileSync(metaPath, JSON.stringify(meta, null, '  '));
+  getMetaFile.save(meta);
 
   console.log(`\n${green('✓')} Project ${destExists ? 'updated' : 'added'}: ${green(dest)}`); // prettier-ignore
 });
