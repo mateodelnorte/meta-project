@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 
 const path = require('path');
-const { green, gray, cyan, yellow } = require('chalk');
+const { green, gray, cyan } = require('chalk');
 const getMetaFile = require('get-meta-file');
 
 const usage = () => {
-  console.log(`Usage: meta-project-add <destFolder> <childRepoUrl>
+  console.log(`Usage: meta-project-create <destFolder> <childRepoUrl>
   
-${yellow(`DEPRECATION NOTICE:  meta project add is being removed in next version in favor of 'meta project import', and 'meta project create'`)}  
-  `);
+Creates a new folder and initializes git with provided remote.`);
   process.exit(1);
 };
 
@@ -18,8 +17,6 @@ const { argv } = process;
 const destArg = argv[2] === 'blank' ? argv[3] : argv[2];
 const repoUrl = argv[3] === 'blank' ? argv[4] : argv[3];
 (destArg && repoUrl) || usage();
-
-
 
 // Load the ".meta" module.
 const meta = getMetaFile();

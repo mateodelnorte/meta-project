@@ -10,7 +10,8 @@ project plugin for [meta](https://github.com/mateodelnorte/meta)
 
   Commands:
 
-    add         add child repository
+    create      create and initialize a new child repository
+    import      import an existing child repository via git clone
     help [cmd]  display help for [cmd]
 
   Options:
@@ -21,5 +22,6 @@ project plugin for [meta](https://github.com/mateodelnorte/meta)
 ```
   usage:
 
-    meta project add <destFolder> <childRepoUrl>
+    meta project import <destFolder> <childRepoUrl>
+    meta project create <destFolder> <childRepoUrl>
 ```
