@@ -1,3 +1,3 @@
 module.exports.register = program => {
-  program.command('project', 'add & remove child repositories');
+  program.command('project', 'create, import, and remove child repositories');
 };

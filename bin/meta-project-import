@@ -1,14 +1,9 @@
 #!/usr/bin/env node
 
-const path = require('path');
-const { green, gray, cyan, yellow } = require('chalk');
-const getMetaFile = require('get-meta-file');
-
 const usage = () => {
-  console.log(`Usage: meta-project-add <destFolder> <childRepoUrl>
+  console.log(`Usage: meta-project-import <destFolder> <childRepoUrl>
   
-${yellow(`DEPRECATION NOTICE:  meta project add is being removed in next version in favor of 'meta project import', and 'meta project create'`)}  
-  `);
+Configures .meta file and imports a project from provided 'childRepoUrl' using git clone into 'destFolder'.`);
   process.exit(1);
 };
 
@@ -19,7 +14,9 @@ const destArg = argv[2] === 'blank' ? argv[3] : argv[2];
 const repoUrl = argv[3] === 'blank' ? argv[4] : argv[3];
 (destArg && repoUrl) || usage();
 
-
+const path = require('path');
+const { green, gray, cyan, inverse } = require('chalk');
+const getMetaFile = require('get-meta-file');
 
 // Load the ".meta" module.
 const meta = getMetaFile();
@@ -38,21 +35,18 @@ const mkdirp = require('mkdirp');
 const tildify = require('tildify');
 
 const destExists = fs.existsSync(dest);
-if (!destExists) {
-  mkdirp.sync(dest);
-} else if (!fs.statSync(dest).isDirectory()) {
-  console.log(`💥 '${dest}' is not a directory`);
+if (destExists && !fs.statSync(dest).isDirectory()) {
+  console.log(`💥 '${dest}' exists and is not a directory`);
   process.exit(1);
 }
 
 const gitExists = destExists && fs.existsSync(path.join(dest, '.git'));
 if (meta.projects[dest] === repoUrl && gitExists) {
-  console.log(`${green('✓')} No changes required.`);
+  console.log(`${green('✓')} A git repository already exists at this location. No changes required.`);
   process.exit(0);
 }
 
-process.chdir(dest);
-gitInit(err => {
+gitClone(err => {
   if (err) throw err;
 
   if (!(dest in meta.projects)) {
@@ -66,50 +60,23 @@ gitInit(err => {
   meta.projects[dest] = repoUrl;
   getMetaFile.save(meta);
 
-  console.log(`\n${green('✓')} Project ${destExists ? 'updated' : 'added'}: ${green(dest)}`); // prettier-ignore
+  console.log(`\n${green('✓')} Project ${destExists ? 'already exists. No changes required.' : 'imported'}: ${green(dest)}`); // prettier-ignore
 });
 
-// Create a ".git" directory if none exists.
-function gitInit(cb) {
+// clone the repo
+function gitClone(cb) {
   if (gitExists) {
-    console.log(`Found pre-existing git repository`); // prettier-ignore
-    return gitSetup(cb);
+    console.log(`Found pre-existing git repository at ${dest}. Will not clone ${repoUrl}.`); // prettier-ignore
+    return cb()
   }
   exec(
     {
-      command: 'git init',
+      command: `git clone ${repoUrl} ${dest}`,
       suppressLogging: true,
     },
     err => {
       if (err) cb(err);
-      else gitSetup(cb);
-    }
-  );
-}
-
-function gitSetup(cb) {
-  console.log(`Updating origin to ${cyan(repoUrl)}`);
-  exec(
-    {
-      command: `git remote remove origin; git remote add origin ${repoUrl}`,
-      suppressLogging: true,
-      stdio: 'ignore',
-    },
-    err => {
-      if (err) return cb(err);
-      if (destExists) {
-        console.log(gray(`Skipping automatic "git pull" to be safe.`));
-        return cb();
-      }
-      console.log(`Pulling from origin...`);
-      exec(
-        {
-          command: `git pull origin master`,
-          suppressLogging: true,
-          stdio: 'ignore',
-        },
-        cb
-      );
+      else return cb();
     }
   );
 }

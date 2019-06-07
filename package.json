@@ -5,7 +5,9 @@
   "main": "index.js",
   "bin": {
     "meta-project": "./bin/meta-project",
-    "meta-project-add": "./bin/meta-project-add"
+    "meta-project-add": "./bin/meta-project-add",
+    "meta-project-create": "./bin/meta-project-create",
+    "meta-project-import": "./bin/meta-project-import"
   },
   "scripts": {
     "test": "echo \"No tests.\""
