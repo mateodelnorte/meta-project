@@ -94,7 +94,7 @@ function gitSetup(cb) {
     },
     err => {
       if (err) return cb(err);
-      return cb()
+      return cb();
     }
   );
 }

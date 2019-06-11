@@ -1,6 +1,6 @@
 # meta-project
-project plugin for [meta](https://github.com/mateodelnorte/meta)
 
+project plugin for [meta](https://github.com/mateodelnorte/meta)
 
 ## Usage
 
@@ -19,6 +19,7 @@ project plugin for [meta](https://github.com/mateodelnorte/meta)
     -h, --help  output usage information
 
 ```
+
 ```
   usage:
 
