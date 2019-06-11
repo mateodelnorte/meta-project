@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const path = require('path');
-const { green, gray, cyan } = require('chalk');
+const { green, cyan } = require('chalk');
 const getMetaFile = require('get-meta-file');
 
 const usage = () => {
@@ -94,19 +94,7 @@ function gitSetup(cb) {
     },
     err => {
       if (err) return cb(err);
-      if (destExists) {
-        console.log(gray(`Skipping automatic "git pull" to be safe.`));
-        return cb();
-      }
-      console.log(`Pulling from origin...`);
-      exec(
-        {
-          command: `git pull origin master`,
-          suppressLogging: true,
-          stdio: 'ignore',
-        },
-        cb
-      );
+      return cb()
     }
   );
 }
