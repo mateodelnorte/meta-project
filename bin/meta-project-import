@@ -67,7 +67,7 @@ gitClone(err => {
 function gitClone(cb) {
   if (gitExists) {
     console.log(`Found pre-existing git repository at ${dest}. Will not clone ${repoUrl}.`); // prettier-ignore
-    return cb()
+    return cb();
   }
   exec(
     {

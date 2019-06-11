@@ -7,7 +7,9 @@ const getMetaFile = require('get-meta-file');
 const usage = () => {
   console.log(`Usage: meta-project-add <destFolder> <childRepoUrl>
   
-${yellow(`DEPRECATION NOTICE:  meta project add is being removed in next version in favor of 'meta project import', and 'meta project create'`)}  
+${yellow(
+  `DEPRECATION NOTICE:  meta project add is being removed in next version in favor of 'meta project import', and 'meta project create'`
+)}  
   `);
   process.exit(1);
 };
@@ -18,8 +20,6 @@ const { argv } = process;
 const destArg = argv[2] === 'blank' ? argv[3] : argv[2];
 const repoUrl = argv[3] === 'blank' ? argv[4] : argv[3];
 (destArg && repoUrl) || usage();
-
-
 
 // Load the ".meta" module.
 const meta = getMetaFile();
