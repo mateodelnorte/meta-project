@@ -3,8 +3,10 @@
 let loaded = false;
 if (!loaded) {
   const program = require('commander');
-  program.command('add', '(deprecated) add child repository').parse(process.argv);
-  program.command('create', 'create and initialize a new child repository').parse(process.argv);
-  program.command('import', 'import an existing child repository using git clone').parse(process.argv);
+  program
+    .command('add', '(deprecated) add child repository')
+    .command('create', 'create and initialize a new child repository')
+    .command('import', 'import an existing child repository using git clone')
+    .parse(process.argv);
   loaded = true;
 }
