@@ -5,7 +5,7 @@ const fs = require('fs');
 const tildify = require('tildify');
 const gitClone = require('../lib/gitClone');
 const path = require('path');
-const { green, gray, cyan, inverse } = require('chalk');
+const { green, cyan, yellow, red } = require('chalk');
 const getMetaFile = require('get-meta-file');
 const mkdirp = require('mkdirp');
 const getCurrentRepoRemote = require('../lib/getCurrentRepoRemote');
@@ -16,12 +16,15 @@ const gitPush = require('../lib/gitPush');
 const removeDirectory = require('../lib/removeDirectory');
 
 const usage = () => {
-  console.log(`Usage: meta-project-migrate <destFolder> <childRepoUrl>
+  console.log(`
+Usage: meta-project-migrate <destFolder> <childRepoUrl>
   
-'meta project migrate' helps you move off of a monorepo into a metarepo, consisting of many individual
-repositories. Should be run from monorepo's root.
+'meta project migrate' helps you move from a monorepo to a meta repo by moving directories from 
+your existing repo into separate child repos, with git history intact. These are then referenced in 
+your '.meta' file and cloned, making the operation transparent to your codebase.
 
-The command codifies this process:
+${yellow('How it works')}
+${yellow('------------')}
 
 A) Migrate will first create a copy of your project in a temporary directory and replace the remote
 'origin' with the provided <childRepoUrl>
@@ -34,7 +37,8 @@ C) Next <destFolder> is removed from your monorepo, and then cloned back into th
 In the eyes of the monorepo, the only thing that has changed is the .meta file, however, <destFolder>
 now also has it's own distinct history.
 
-* While in Migration Phase
+${yellow('Migration Phase')}
+${yellow('---------------')}
 
 If you need the monorepos structure to stay in tact for any extended duration, such as supporting legacy CI
 systems, you can stop here. 
