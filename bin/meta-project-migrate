@@ -21,44 +21,29 @@ const usage = () => {
 'meta project migrate' helps you move off of a monorepo into a metarepo, consisting of many individual
 repositories. Should be run from monorepo's root.
 
-Migrate has two distinct steps - they are run separately due to the nature of the migration process. 
+The command codifies this process:
 
-In some instances you may want both together right away, and in others it may be weeks or more 
-between running the first and second command. 'meta project migrate' is the first step, and 
-'meta project migrated' finishes the migration.
+A) Migrate will first create a copy of your project in a temporary directory and replace the remote
+'origin' with the provided <childRepoUrl>
 
-# Step One - meta project migrate <destFolder> <childRepoUrl>
-
-## How it works
-
-A) Migrate will first create a copy of your project in a temporary directory and remove the remote 'origin'
-and create a new remote 'origin' configured with the new <childRepoUrl>.
-
-It will then isolate the given <destFolder> and remove git history that does not pertain to it, and moving
-everything in the folder to the root of the directory.
-
-The process used to do this is detailed here:
+B) It will split the history from <destFolder> and push to the provided <childRepo>:
 https://help.github.com/en/articles/splitting-a-subfolder-out-into-a-new-repository
 
-B) Next <destFolder> is removed from your monorepo, and then cloned back into the same location.
+C) Next <destFolder> is removed from your monorepo, and then cloned back into the same location.
 
 In the eyes of the monorepo, the only thing that has changed is the .meta file, however, <destFolder>
 now also has it's own distinct history.
 
-## When to proceed to Step Two
+* While in Migration Phase
 
 If you need the monorepos structure to stay in tact for any extended duration, such as supporting legacy CI
 systems, you can stop here. 
 
-While in this 'migration' phase, you need to commit to the child directories
-git history as well as the monorepos git history. These commits can literally be made twice by cd-ing around
-or both can be made at once using 'meta git commit'
+While in this 'migration' phase, you need to commit to the child directory's git history as well as the 
+monorepo's git history. These commits can literally be made twice by cd-ing around or both can be made 
+at once using 'meta git commit'.
 
-# Step Two - meta project migrated <destFolder>
-
-This step is run when the monorepo no longer needs to be maintained.
-
-It simply adds the project to the .gitignore of the monorepo so it is no longer tracked in both places.
+When the monorepo no longer needs to be maintained you can simply add it to your '.gitignore'
 `);
   process.exit(1);
 };
