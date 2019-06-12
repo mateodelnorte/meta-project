@@ -133,7 +133,7 @@ const run = ({
       meta.projects[dest] = repoUrl;
       getMetaFile.save(meta);
 
-      console.log(`\n${green('✓')} Project ${destExists ? 'already exists. No changes required.' : `imported migrated repo from ${repoUrl}`}: ${green(dest)}`); // prettier-ignore
+      console.log(`\n${green('✓')} Migrated repo from ${cyan(dest)} to ${cyan(repoUrl)}`); // prettier-ignore
     }
 
     gitClone({
