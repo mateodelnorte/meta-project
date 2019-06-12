@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/mateodelnorte/meta-project.svg?branch=master)](https://travis-ci.com/mateodelnorte/meta-project)
+
 # meta-project
 
 project plugin for [meta](https://github.com/mateodelnorte/meta)
