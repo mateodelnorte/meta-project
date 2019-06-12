@@ -1,0 +1,175 @@
+#!/usr/bin/env node
+
+const exec = require('meta-exec');
+const fs = require('fs');
+const tildify = require('tildify');
+const gitClone = require('../lib/gitClone');
+const path = require('path');
+const { green, gray, cyan, inverse } = require('chalk');
+const getMetaFile = require('get-meta-file');
+const mkdirp = require('mkdirp');
+const getCurrentRepoRemote = require('../lib/getCurrentRepoRemote');
+const removeRemote = require('../lib/removeRemote');
+const addRemote = require('../lib/addRemote');
+const splitSubtree = require('../lib/splitSubtree');
+const gitPush = require('../lib/gitPush');
+const removeDirectory = require('../lib/removeDirectory');
+
+const usage = () => {
+  console.log(`Usage: meta-project-migrate <destFolder> <childRepoUrl>
+  
+'meta project migrate' helps you move off of a monorepo into a metarepo, consisting of many individual
+repositories. Should be run from monorepo's root.
+
+Migrate has two distinct steps - they are run separately due to the nature of the migration process. 
+
+In some instances you may want both together right away, and in others it may be weeks or more 
+between running the first and second command. 'meta project migrate' is the first step, and 
+'meta project migrated' finishes the migration.
+
+# Step One - meta project migrate <destFolder> <childRepoUrl>
+
+## How it works
+
+A) Migrate will first create a copy of your project in a temporary directory and remove the remote 'origin'
+and create a new remote 'origin' configured with the new <childRepoUrl>.
+
+It will then isolate the given <destFolder> and remove git history that does not pertain to it, and moving
+everything in the folder to the root of the directory.
+
+The process used to do this is detailed here:
+https://help.github.com/en/articles/splitting-a-subfolder-out-into-a-new-repository
+
+B) Next <destFolder> is removed from your monorepo, and then cloned back into the same location.
+
+In the eyes of the monorepo, the only thing that has changed is the .meta file, however, <destFolder>
+now also has it's own distinct history.
+
+## When to proceed to Step Two
+
+If you need the monorepos structure to stay in tact for any extended duration, such as supporting legacy CI
+systems, you can stop here. 
+
+While in this 'migration' phase, you need to commit to the child directories
+git history as well as the monorepos git history. These commits can literally be made twice by cd-ing around
+or both can be made at once using 'meta git commit'
+
+# Step Two - meta project migrated <destFolder>
+
+This step is run when the monorepo no longer needs to be maintained.
+
+It simply adds the project to the .gitignore of the monorepo so it is no longer tracked in both places.
+`);
+  process.exit(1);
+};
+
+const run = ({
+  process
+}) => {
+  const { argv } = process;
+  /^(-h||--help)$/.test(argv[2]) && usage();
+
+  const destArg = argv[2] === 'blank' ? argv[3] : argv[2];
+  const repoUrl = argv[3] === 'blank' ? argv[4] : argv[3];
+  (destArg && repoUrl) || usage();
+
+  // Load the ".meta" module.
+  const meta = getMetaFile();
+  if (!meta) process.exit(1);
+
+  const metaPath = getMetaFile.getFileLocation();
+  const dest = path.relative(path.dirname(metaPath), path.resolve(destArg));
+  
+  if (dest[0] === '.') {
+    console.error(`💥 Projects cannot be outside the meta repo: ${cyan(dest)}`); // prettier-ignore
+    process.exit(1);
+  }
+
+  const destExists = fs.existsSync(dest);
+  if (destExists && !fs.statSync(dest).isDirectory()) {
+    console.log(`💥 '${dest}' exists and is not a directory`);
+    process.exit(1);
+  }
+
+  const gitExists = destExists && fs.existsSync(path.join(dest, '.git'));
+  if (meta.projects[dest] === repoUrl && gitExists) {
+    console.log(`${green('✓')} A git repository already exists at this location. We won't make any changes.`);
+    process.exit(0);
+  }
+
+  const rootRepo = getCurrentRepoRemote()
+
+  console.log(`Root remote found: ${cyan(tildify(rootRepo))}`)
+
+  const monorepoDir = process.cwd()
+  const tempDir = path.resolve(monorepoDir,'./.tmp')
+  console.log({tempDir})
+  mkdirp.sync(tempDir);
+
+  function afterGitClone (err) {
+    if (err) throw err;
+
+    process.chdir(tempDir);
+
+    console.log(`Now working in ${tempDir}`)
+
+    removeRemote({
+      remoteName: 'origin'
+    })
+
+    splitSubtree({
+      subdirectory: dest
+    })
+
+    addRemote({
+      remoteName: 'origin',
+      gitUrl: repoUrl
+    })
+
+    gitPush({
+      remote: 'origin',
+      branch: 'master'
+    })
+
+    process.chdir(monorepoDir);
+
+    console.log(`History for ${dest} has been extracted and pushed to ${repoUrl}. Back to working in ${monorepoDir}.`);
+
+    removeDirectory(tempDir);
+    
+    // now we need to remove the existing subfolder and replace it with same content from repoUrl via clone
+    removeDirectory(dest);
+
+    function afterImport (err) {
+      if (err) throw err;
+
+      console.log(`Updating "projects" in ${cyan(tildify(metaPath))}`); // prettier-ignore
+      if (!meta.projects) meta.projects = {};
+      meta.projects[dest] = repoUrl;
+      getMetaFile.save(meta);
+
+      console.log(`\n${green('✓')} Project ${destExists ? 'already exists. No changes required.' : `imported migrated repo from ${repoUrl}`}: ${green(dest)}`); // prettier-ignore
+    }
+
+    gitClone({
+      cb: afterImport,
+      repoUrl,
+      dest,
+      gitExists
+    });
+
+  }
+
+  console.log(`cloning into temp directory: ${cyan(tildify(tempDir))}`)
+
+  gitClone({
+    cb: afterGitClone,
+    repoUrl: rootRepo,
+    dest: tempDir,
+    gitExists
+  });
+}
+
+run({
+  process
+})
