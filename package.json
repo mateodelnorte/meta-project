@@ -48,7 +48,8 @@
     "loop": "3.3.2",
     "meta-exec": "1.4.1",
     "mkdirp": "0.5.1",
-    "rimraf": "2.6.3"
+    "rimraf": "2.6.3",
+    "tildify": "^2.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "8.0.0",
