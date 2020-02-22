@@ -8,7 +8,7 @@ if (!loaded) {
     .command('create', 'create and initialize a new child repository')
     .command('import', 'import an existing child repository using git clone')
     .command('migrate', 'migrate from a monorepo to a metarepo')
-    .command('update', 'update missing child repositories')
+    .command('sync', 'update missing child repositories')
     .parse(process.argv);
   loaded = true;
 }
