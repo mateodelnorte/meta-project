@@ -3,5 +3,5 @@ module.exports.register = program => {
 };
 
 exports.update = options => {
-  require('./lib/metaProjectUpdate')(options);
+  require('./lib/metaProjectSync')(options);
 };

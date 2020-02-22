@@ -1,5 +1,0 @@
-#!/usr/bin/env node
-
-if (!process.argv[1] || process.argv[1] === '--help') return console.log(`\n  Usage:\n\n    meta project update\n`);
-
-require('../lib/metaProjectUpdate')();
