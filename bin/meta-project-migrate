@@ -87,7 +87,10 @@ const run = ({
   }
 
   const rootRepo = getCurrentRepoRemote()
-
+  if (!rootRepo) {
+    console.log(`💥 no root repo found`);
+    process.exit(1);
+  }
   console.log(`Root remote found: ${cyan(tildify(rootRepo))}`)
 
   const monorepoDir = process.cwd()
