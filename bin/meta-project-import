@@ -3,11 +3,18 @@
 const fs = require('fs');
 const tildify = require('tildify');
 const gitClone = require('../lib/gitClone');
+const getCurrentRepoRemote = require('../lib/getCurrentRepoRemote');
 
 const usage = () => {
-  console.log(`Usage: meta-project-import <destFolder> <childRepoUrl>
-  
-Configures .meta file and imports a project from provided 'childRepoUrl' using git clone into 'destFolder'.`);
+  console.log(`Usage: meta-project-import <destFolder> [<childRepoUrl>]
+
+Configures .meta file and imports a project from provided 'destFolder'.
+
+  'destFolder' exists:
+      no 'childRepoUrl' defined: the remote will be detected
+      'childRepoUrl' defined: the remote will be updated
+
+  'destFolder' does not exist: 'childRepoUrl' will be cloned into 'destFolder'.`);
   process.exit(1);
 };
 
@@ -18,9 +25,9 @@ const run = ({
   /^(-h||--help)$/.test(argv[2]) && usage();
   
   const destArg = argv[2] === 'blank' ? argv[3] : argv[2];
-  const repoUrl = argv[3] === 'blank' ? argv[4] : argv[3];
-  (destArg && repoUrl) || usage();
-  
+  let repoUrl = argv[3] === 'blank' ? argv[4] : argv[3];
+  destArg || usage();
+
   const path = require('path');
   const { green, gray, cyan, inverse } = require('chalk');
   const getMetaFile = require('get-meta-file');
@@ -43,9 +50,22 @@ const run = ({
   }
   
   const gitExists = destExists && fs.existsSync(path.join(dest, '.git'));
-  if (meta.projects[dest] === repoUrl && gitExists) {
-    console.log(`${green('✓')} A git repository already exists at this location. No changes required.`);
-    process.exit(0);
+  let detected = false;
+  if (gitExists) {
+    if (repoUrl && meta.projects[dest] === repoUrl) {
+      console.log(`${green('✓')} A git repository already exists at this location. No changes required.`);
+      process.exit(0);
+    } else if (!repoUrl) {
+      repoUrl = getCurrentRepoRemote({
+        cwd: dest
+      });
+      if (!repoUrl) {
+        console.log(`💥 '${dest}' exists but has no remote`);
+        process.exit(1);
+      } else {
+        detected = true;
+      }
+    }
   }
 
   const cb = err => {
@@ -61,8 +81,11 @@ const run = ({
     if (!meta.projects) meta.projects = {};
     meta.projects[dest] = repoUrl;
     getMetaFile.save(meta);
-  
-    console.log(`\n${green('✓')} Project ${destExists ? 'already exists. No changes required.' : 'imported'}: ${green(dest)}`); // prettier-ignore
+    if (detected) {
+      console.log(`\n${green('✓')} Project imported: ${green(dest)} (${green(repoUrl)})`); // prettier-ignore
+    } else {
+      console.log(`\n${green('✓')} Project ${destExists ? 'already exists. No changes required.' : 'imported'}: ${green(dest)}`); // prettier-ignore
+    }
   }
   
   gitClone({
