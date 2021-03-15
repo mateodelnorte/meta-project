@@ -7,7 +7,7 @@ project plugin for [meta](https://github.com/mateodelnorte/meta)
 ## Usage
 
 ```
-  Usage: meta project [options] [command]
+  Usage: meta project [<options>] <command>
 
 
   Commands:
@@ -15,7 +15,7 @@ project plugin for [meta](https://github.com/mateodelnorte/meta)
     create      create and initialize a new child repository
     import      import an existing child repository via git clone
     migrate     migrate from a monorepo to a metarepo
-    help [cmd]  display help for [cmd]
+    help <cmd>  display help for <cmd>
 
   Options:
 
@@ -25,7 +25,7 @@ project plugin for [meta](https://github.com/mateodelnorte/meta)
 
 ## Creating a new project
 
-To create a new project, use `meta project create [folder] [repo url]`
+To create a new project, use `meta project create <folder> <repo url>`
 
 ```
 meta project create new-dir git@github.com/org/repo
@@ -71,8 +71,9 @@ meta project migrate project-c git@github.com/yourorg/project-c
 ```
 
 This will keep the git history of each subproject in tact, using some git magic:
-* Explanation: https://help.github.com/en/articles/splitting-a-subfolder-out-into-a-new-repository
-* Implementation: https://github.com/mateodelnorte/meta-project/blob/master/lib/splitSubtree.js
+
+- Explanation: https://help.github.com/en/articles/splitting-a-subfolder-out-into-a-new-repository
+- Implementation: https://github.com/mateodelnorte/meta-project/blob/master/lib/splitSubtree.js
 
 ## How it works
 
