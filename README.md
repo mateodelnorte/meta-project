@@ -39,7 +39,7 @@ To import an existing project, use `meta project import <folder> [<repo url>]`
 meta project import projects/example git@github.com/your-org/example
 ```
 
-To import existing project which is already checked out at <folder>, <repo-url> can be omitted
+To import existing project which is already checked out at `<folder>`, `<repo-url>` can be omitted
 
 ```
 meta project import projects/example
