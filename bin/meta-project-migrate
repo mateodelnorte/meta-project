@@ -52,9 +52,7 @@ When the monorepo no longer needs to be maintained you can simply add it to your
   process.exit(1);
 };
 
-const run = ({
-  process
-}) => {
+const run = ({ process }) => {
   const { argv } = process;
   /^(-h||--help)$/.test(argv[2]) && usage();
 
@@ -68,7 +66,7 @@ const run = ({
 
   const metaPath = getMetaFile.getFileLocation();
   const dest = path.relative(path.dirname(metaPath), path.resolve(destArg));
-  
+
   if (dest[0] === '.') {
     console.error(`💥 Projects cannot be outside the meta repo: ${cyan(dest)}`); // prettier-ignore
     process.exit(1);
@@ -86,53 +84,53 @@ const run = ({
     process.exit(0);
   }
 
-  const rootRepo = getCurrentRepoRemote()
+  const rootRepo = getCurrentRepoRemote();
   if (!rootRepo) {
     console.log(`💥 no root repo found`);
     process.exit(1);
   }
-  console.log(`Root remote found: ${cyan(tildify(rootRepo))}`)
+  console.log(`Root remote found: ${cyan(tildify(rootRepo))}`);
 
-  const monorepoDir = process.cwd()
-  const tempDir = path.resolve(monorepoDir,'./.tmp')
-  console.log({tempDir})
+  const monorepoDir = process.cwd();
+  const tempDir = path.resolve(monorepoDir, './.tmp');
+  console.log({ tempDir });
   mkdirp.sync(tempDir);
 
-  function afterGitClone (err) {
+  function afterGitClone(err) {
     if (err) throw err;
 
     process.chdir(tempDir);
 
-    console.log(`Now working in ${tempDir}`)
+    console.log(`Now working in ${tempDir}`);
 
     removeRemote({
-      remoteName: 'origin'
-    })
+      remoteName: 'origin',
+    });
 
     splitSubtree({
-      subdirectory: dest
-    })
+      subdirectory: dest,
+    });
 
     addRemote({
       remoteName: 'origin',
-      gitUrl: repoUrl
-    })
+      gitUrl: repoUrl,
+    });
 
     gitPush({
       remote: 'origin',
-      branch: 'master'
-    })
+      branch: 'master',
+    });
 
     process.chdir(monorepoDir);
 
     console.log(`History for ${dest} has been extracted and pushed to ${repoUrl}. Back to working in ${monorepoDir}.`);
 
     removeDirectory(tempDir);
-    
+
     // now we need to remove the existing subfolder and replace it with same content from repoUrl via clone
     removeDirectory(dest);
 
-    function afterImport (err) {
+    function afterImport(err) {
       if (err) throw err;
 
       console.log(`Updating "projects" in ${cyan(tildify(metaPath))}`); // prettier-ignore
@@ -147,21 +145,20 @@ const run = ({
       cb: afterImport,
       repoUrl,
       dest,
-      gitExists
+      gitExists,
     });
-
   }
 
-  console.log(`cloning into temp directory: ${cyan(tildify(tempDir))}`)
+  console.log(`cloning into temp directory: ${cyan(tildify(tempDir))}`);
 
   gitClone({
     cb: afterGitClone,
     repoUrl: rootRepo,
     dest: tempDir,
-    gitExists
+    gitExists,
   });
-}
+};
 
 run({
-  process
-})
+  process,
+});

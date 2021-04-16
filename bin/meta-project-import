@@ -18,12 +18,10 @@ Configures .meta file and imports a project from provided 'destFolder'.
   process.exit(1);
 };
 
-const run = ({
-  process
-}) => {
+const run = ({ process }) => {
   const { argv } = process;
   /^(-h||--help)$/.test(argv[2]) && usage();
-  
+
   const destArg = argv[2] === 'blank' ? argv[3] : argv[2];
   let repoUrl = argv[3] === 'blank' ? argv[4] : argv[3];
   destArg || usage();
@@ -31,24 +29,24 @@ const run = ({
   const path = require('path');
   const { green, gray, cyan, inverse } = require('chalk');
   const getMetaFile = require('get-meta-file');
-  
+
   // Load the ".meta" module.
   const meta = getMetaFile();
   if (!meta) process.exit(1);
-  
+
   const metaPath = getMetaFile.getFileLocation();
   const dest = path.relative(path.dirname(metaPath), path.resolve(destArg));
   if (dest[0] === '.') {
     console.error(`💥 Projects cannot be outside the meta repo: ${cyan(dest)}`); // prettier-ignore
     process.exit(1);
   }
-  
+
   const destExists = fs.existsSync(dest);
   if (destExists && !fs.statSync(dest).isDirectory()) {
     console.log(`💥 '${dest}' exists and is not a directory`);
     process.exit(1);
   }
-  
+
   const gitExists = destExists && fs.existsSync(path.join(dest, '.git'));
   let detected = false;
   if (gitExists) {
@@ -57,7 +55,7 @@ const run = ({
       process.exit(0);
     } else if (!repoUrl) {
       repoUrl = getCurrentRepoRemote({
-        cwd: dest
+        cwd: dest,
       });
       if (!repoUrl) {
         console.log(`💥 '${dest}' exists but has no remote`);
@@ -70,13 +68,13 @@ const run = ({
 
   const cb = err => {
     if (err) throw err;
-  
+
     if (!(dest in meta.projects)) {
       const gitIgnorePath = metaPath.replace(/.meta$/, '.gitignore');
       console.log(`Appending to ${cyan(tildify(gitIgnorePath))}`);
       fs.appendFileSync(gitIgnorePath, `/${dest}/\n`);
     }
-  
+
     console.log(`Updating "projects" in ${cyan(tildify(metaPath))}`); // prettier-ignore
     if (!meta.projects) meta.projects = {};
     meta.projects[dest] = repoUrl;
@@ -86,16 +84,16 @@ const run = ({
     } else {
       console.log(`\n${green('✓')} Project ${destExists ? 'already exists. No changes required.' : 'imported'}: ${green(dest)}`); // prettier-ignore
     }
-  }
-  
+  };
+
   gitClone({
     cb,
     repoUrl,
     dest,
-    gitExists
+    gitExists,
   });
-}
+};
 
 run({
-  process
-})
+  process,
+});
