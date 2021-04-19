@@ -52,7 +52,7 @@ if (meta.projects[dest] === repoUrl && gitExists) {
 }
 
 process.chdir(dest);
-gitInit(err => {
+gitInit((err) => {
   if (err) throw err;
 
   if (!(dest in meta.projects)) {
@@ -80,7 +80,7 @@ function gitInit(cb) {
       command: 'git init',
       suppressLogging: true,
     },
-    err => {
+    (err) => {
       if (err) cb(err);
       else gitSetup(cb);
     }
@@ -95,7 +95,7 @@ function gitSetup(cb) {
       suppressLogging: true,
       stdio: 'ignore',
     },
-    err => {
+    (err) => {
       if (err) return cb(err);
       if (destExists) {
         console.log(gray(`Skipping automatic "git pull" to be safe.`));

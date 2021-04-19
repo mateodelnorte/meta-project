@@ -66,7 +66,7 @@ const run = ({ process }) => {
     }
   }
 
-  const cb = err => {
+  const cb = (err) => {
     if (err) throw err;
 
     if (!(dest in meta.projects)) {
