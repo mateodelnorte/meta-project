@@ -58,6 +58,7 @@ const run = ({ process }) => {
 
   const destArg = argv[2] === 'blank' ? argv[3] : argv[2];
   const repoUrl = argv[3] === 'blank' ? argv[4] : argv[3];
+  const branch = argv[4] === 'blank' ? null : argv[4];
   (destArg && repoUrl) || usage();
 
   // Load the ".meta" module.
@@ -103,22 +104,31 @@ const run = ({ process }) => {
 
     console.log(`Now working in ${tempDir}`);
 
+    console.log(`Removing original remote "origin"`);
+
     removeRemote({
       remoteName: 'origin',
     });
 
+    console.log(`Splitting subdirectory "${dest}" history`);
+
     splitSubtree({
       subdirectory: dest,
     });
+
+    console.log(`Setting remote origin to ${repoUrl}`);
 
     addRemote({
       remoteName: 'origin',
       gitUrl: repoUrl,
     });
 
+    let pushBranch = branch || 'master';
+    console.log(`Pushing split history to new remote origin ${repoUrl} on branch ${pushBranch}`);
+
     gitPush({
       remote: 'origin',
-      branch: 'master',
+      branch: pushBranch,
     });
 
     process.chdir(monorepoDir);
@@ -146,7 +156,7 @@ const run = ({ process }) => {
       repoUrl,
       dest,
       gitExists,
-      branch: 'master',
+      branch,
     });
   }
 
@@ -157,7 +167,7 @@ const run = ({ process }) => {
     repoUrl: rootRepo,
     dest: tempDir,
     gitExists,
-    branch: 'master',
+    branch,
   });
 };
 
