@@ -146,6 +146,7 @@ const run = ({ process }) => {
       repoUrl,
       dest,
       gitExists,
+      branch: 'master',
     });
   }
 
@@ -156,6 +157,7 @@ const run = ({ process }) => {
     repoUrl: rootRepo,
     dest: tempDir,
     gitExists,
+    branch: 'master',
   });
 };
 
