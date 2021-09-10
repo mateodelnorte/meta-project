@@ -70,7 +70,7 @@ gitInit((err) => {
 function gitInit(cb) {
   if (gitExists) {
     console.log(`Found pre-existing git repository`); // prettier-ignore
-    return gitSetup(cb);
+    return gitUpdateRemote(cb);
   }
   exec(
     {
@@ -79,12 +79,27 @@ function gitInit(cb) {
     },
     (err) => {
       if (err) cb(err);
-      else gitSetup(cb);
+      else gitAddRemote(cb);
     }
   );
 }
 
-function gitSetup(cb) {
+function gitAddRemote(cb) {
+  console.log(`Adding new origin to ${cyan(repoUrl)}`);
+  exec(
+    {
+      command: `git remote add origin ${repoUrl}`,
+      suppressLogging: true,
+      stdio: 'ignore',
+    },
+    (err) => {
+      if (err) return cb(err);
+      return cb();
+    }
+  );
+}
+
+function gitUpdateRemote(cb) {
   console.log(`Updating origin to ${cyan(repoUrl)}`);
   exec(
     {
