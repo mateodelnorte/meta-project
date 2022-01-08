@@ -43,7 +43,7 @@
     "meta-exec": "1.4.4",
     "mkdirp": "0.5.5",
     "rimraf": "2.7.1",
-    "tildify": "^2.0.0"
+    "tildify": "^3.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "12.1.4",
