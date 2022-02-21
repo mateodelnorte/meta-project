@@ -58,7 +58,7 @@ const run = ({ process }) => {
 
   const destArg = argv[2] === 'blank' ? argv[3] : argv[2];
   const repoUrl = argv[3] === 'blank' ? argv[4] : argv[3];
-  const branch = argv[4] === 'blank' ? null : argv[4];
+  const branch = (argv[4] === 'blank' ? null : argv[4]) || "master";
   (destArg && repoUrl) || usage();
 
   // Load the ".meta" module.
@@ -93,29 +93,30 @@ const run = ({ process }) => {
   console.log(`Root remote found: ${cyan(tildify(rootRepo))}`);
 
   const monorepoDir = process.cwd();
-  const tempDir = path.resolve(monorepoDir, './.tmp');
-  console.log({ tempDir });
-  mkdirp.sync(tempDir);
+  const tempDir = fs.mkdtempSync("meta-project-migrate-");
+  console.log(tempDir);
 
   function afterGitClone(err) {
     if (err) throw err;
 
+    console.log(`Splitting subdirectory "${dest}" history into temporary folder "${tempDir}"`);
+    splitSubtree({
+      subdirectory: dest,
+      source: monorepoDir,
+      target: tempDir,
+      branch: branch,
+    });
+
     process.chdir(tempDir);
 
     console.log(`Now working in ${tempDir}`);
-
+    
     console.log(`Removing original remote "origin"`);
 
     removeRemote({
       remoteName: 'origin',
     });
-
-    console.log(`Splitting subdirectory "${dest}" history`);
-
-    splitSubtree({
-      subdirectory: dest,
-    });
-
+    
     console.log(`Setting remote origin to ${repoUrl}`);
 
     addRemote({
@@ -123,12 +124,11 @@ const run = ({ process }) => {
       gitUrl: repoUrl,
     });
 
-    let pushBranch = branch || 'master';
-    console.log(`Pushing split history to new remote origin ${repoUrl} on branch ${pushBranch}`);
+    console.log(`Pushing split history to new remote origin ${repoUrl} on branch ${branch}`);
 
     gitPush({
       remote: 'origin',
-      branch: pushBranch,
+      branch: branch,
     });
 
     process.chdir(monorepoDir);
