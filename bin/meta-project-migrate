@@ -55,15 +55,15 @@ When the monorepo no longer needs to be maintained you can simply add it to your
 const run = ({ process }) => {
   const { argv } = process;
   /^(-h||--help)$/.test(argv[2]) && usage();
-
-  const destArg = argv[2] === 'blank' ? argv[3] : argv[2];
-  const repoUrl = argv[3] === 'blank' ? argv[4] : argv[3];
-  const branch = (argv[4] === 'blank' ? null : argv[4]) || "master";
-  (destArg && repoUrl) || usage();
-
+  
   // Load the ".meta" module.
   const meta = getMetaFile();
   if (!meta) process.exit(1);
+
+  const destArg = argv[2] === 'blank' ? argv[3] : argv[2];
+  const repoUrl = argv[3] === 'blank' ? argv[4] : argv[3];
+  const branch = (argv[4] === 'blank' ? null : argv[4]) || meta.defaultBranch || "master";
+  (destArg && repoUrl) || usage();
 
   const metaPath = getMetaFile.getFileLocation();
   const dest = path.relative(path.dirname(metaPath), path.resolve(destArg));
