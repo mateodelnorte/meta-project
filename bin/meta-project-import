@@ -64,6 +64,8 @@ const run = ({ process }) => {
         detected = true;
       }
     }
+  } else if (!destExists && !repoUrl) {
+    usage();
   }
 
   const cb = (err) => {
