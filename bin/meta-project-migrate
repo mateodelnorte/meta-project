@@ -114,6 +114,7 @@ const run = ({ process }) => {
 
     splitSubtree({
       subdirectory: dest,
+      branch
     });
 
     console.log(`Setting remote origin to ${repoUrl}`);
