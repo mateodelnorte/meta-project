@@ -42,7 +42,7 @@
     "loop": "3.3.6",
     "meta-exec": "1.4.4",
     "mkdirp": "0.5.5",
-    "rimraf": "2.7.1",
+    "rimraf": "5.0.5",
     "tildify": "^2.0.0"
   },
   "devDependencies": {
